@@ -1,15 +1,18 @@
 const { getDatabase } = require('../config/database');
 const { getDifficultyAndPoints } = require('../utils/helpers');
 
+const TABLE_NAME = process.env.TABLE_NAME;
+
+
 async function getTeamByGithubUsername(username) {
   const db = getDatabase();
-  return db.collection('Teams-2').findOne({ "github_username": username });
+  return db.collection(TABLE_NAME).findOne({ "github_username": username });
 }
 
 async function updateTeamPoints(username, difficulty, points) {
   const db = getDatabase();
   try {
-    const result = await db.collection('Teams-2').updateOne(
+    const result = await db.collection(TABLE_NAME).updateOne(
       { "github_username": username },
       {
         $inc: {
@@ -21,12 +24,12 @@ async function updateTeamPoints(username, difficulty, points) {
   } catch (error) {
     console.error('Error updating team points:', error);
   }
-} 
+}
 
 async function getLeaderboard() {
   const db = getDatabase();
   try {
-    const teams = await db.collection('Teams-2').find({ disqualified: false })
+    const teams = await db.collection(TABLE_NAME).find({ disqualified: false })
       .project({
         team_name: 1,
         team_members: 1, // Include team members
@@ -42,11 +45,7 @@ async function getLeaderboard() {
       const { easy = 0, medium = 0, hard = 0 } = team.problems_solved || {};
 
       // Define points for each difficulty level directly
-      const difficultyPoints = {
-        easy: 2,
-        medium: 4,
-        hard: 7
-      };
+      const difficultyPoints = getDifficultyAndPoints();
 
       // Calculate score based on the number of solved problems for each difficulty
       let score = 0 - team.penalty;
@@ -62,7 +61,7 @@ async function getLeaderboard() {
         github_username: team.github_username
       };
     });
-  
+
     //console.log(leaderboard);
     return leaderboard;
   } catch (error) {

@@ -1,11 +1,11 @@
-function getDifficultyAndPoints(labels) {
-    const difficultyLabels = {
-      'easy': { difficulty: 'easy', points: 2 },
-      'medium': { difficulty: 'medium', points: 4 },
-      'hard': { difficulty: 'hard', points: 7 }
-    };
+function getDifficultyAndPoints() {
+  const difficultyLabels = {
+    'easy': 2,
+    'medium': 4,
+    'hard': 7
+  };
 
-    return difficultyLabels['hard'];
-  }
-  
-  module.exports = { getDifficultyAndPoints };
+  return difficultyLabels;
+}
+
+module.exports = { getDifficultyAndPoints };

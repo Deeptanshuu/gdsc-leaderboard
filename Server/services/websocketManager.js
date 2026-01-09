@@ -4,8 +4,8 @@ const { getDatabase } = require('../config/database');
 const { RateLimiterMemory } = require('rate-limiter-flexible');
 
 const rateLimiter = new RateLimiterMemory({
-  points: 5, // 5 requests
-  duration: 1, // per second
+  points: 5,
+  duration: 1,
 });
 
 let io;
@@ -30,10 +30,8 @@ function initWebSocketServer(server) {
 
     socket.on('someEvent', async (data) => {
       try {
-        await rateLimiter.consume(socket.id); // Consume a point for this user
-        // Process the event
+        await rateLimiter.consume(socket.id);
       } catch (rejRes) {
-        // Rate limit exceeded
         socket.emit('rateLimitExceeded', 'Too many requests, please try again later.');
       }
     });
@@ -67,7 +65,7 @@ function broadcastLeaderboard(leaderboard) {
 // Set up MongoDB change stream and watch for updates
 function setupChangeStream() {
   const db = getDatabase();
-  const Teams = db.collection('Teams-2');
+  const Teams = db.collection(process.env.TABLE_NAME);
   const changeStream = Teams.watch();
 
   console.log('Change stream setup complete.');
