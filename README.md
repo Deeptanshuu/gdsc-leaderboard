@@ -1,214 +1,163 @@
-﻿# GDSC Leaderboard
+﻿<div align="center">
 
-A real-time leaderboard application for tracking and displaying GitHub contributions from participants. Built with Node.js and React, this application provides live updates of member activities and contributions using WebSocket technology.
+<img src="./docs/images/banner.png" alt="Hacktoberfest Leaderboard by GDG RAIT: merged pull requests in, team rankings out, beside the dark-mode board" width="100%">
 
-## Overview
+</div>
 
-The GDSC Leaderboard tracks GitHub activities in real-time, displaying member contributions and achievements. It features a modern, responsive interface with live updates and secure backend integration.
+<br>
 
-## Project Gallery
+The leaderboard for **GDG RAIT's Hacktoberfest 2024** event at Ramrao Adik Institute of Technology. 14 teams and 51 students raised pull requests against event repositories. Every merged PR earned points by difficulty, and the board re-ranked itself in every open browser the moment a PR was merged.
 
-![image](https://github.com/user-attachments/assets/6117a5c5-78a0-42fa-b7a7-db23c0189009)
-![image](https://github.com/user-attachments/assets/e1befd12-0ef3-42ec-97fd-33defd0306f5)
+During the event a GitHub webhook fed an Express server, MongoDB stored the scores, and Socket.IO pushed each change to the React board. Once the event closed, the final standings were frozen into `FINAL-LIST.json` and the frontend became a static site on Vercel.
 
-![image](https://github.com/user-attachments/assets/c6c367b5-986b-4a09-aa12-3af223f0f9da)
-![image](https://github.com/user-attachments/assets/ee40640e-3a32-45d9-a8d2-181abfa544f6)
+![The leaderboard in light mode: the GDG, DY Patil and IIC logos, the Hacktoberfest Leaderboard title, a search bar, and teams ranked by score with member avatars](./docs/images/leaderboard-light.png)
 
+## What's on the board
 
-### Application Screenshots
-1. Main Leaderboard Interface
-2. Dark/Light Theme Variants
-3. Mobile Responsive View
-4. Achievement Badges Display
+| | |
+| --- | --- |
+| **Live ranking** | Teams sorted by score, with gold, silver and bronze badges for the top three |
+| **Team details** | Open a team to see its members, hard problems solved and GitHub username |
+| **Search** | Filter by team name, member name or GitHub username as you type |
+| **Results view** | `/lb` shows the top five and the bottom three, for announcing results on a projector |
+| **Light and dark** | Theme toggle in the header, with an animated particle background in both |
+| **Phones** | Scores stack under the avatars and the card goes full width on small screens |
 
-### Technical Diagrams
-1. System Architecture Overview
-2. Component Structure
-3. Backend Architecture
-4. Deployment Workflow
-5. Performance Monitoring Dashboard
+<table>
+<tr>
+<td width="50%"><img src="./docs/images/team-details-dark.png" alt="Dark mode with Bit by Bit opened: four team members, 6 hard problems solved and the GitHub username"></td>
+<td width="50%"><img src="./docs/images/search.png" alt="Searching for 'code' narrows the board to Code Bots, Pixel Coders, Pseudo Coders and Chintu Coders"></td>
+</tr>
+<tr>
+<td align="center">A team opened in dark mode</td>
+<td align="center">Searching for "code"</td>
+</tr>
+<tr>
+<td width="50%"><img src="./docs/images/results-dark.png" alt="The /lb results view: the top five teams, a dotted divider, then the bottom three outlined in red"></td>
+<td width="50%" align="center"><img src="./docs/images/mobile.png" alt="The board on a phone in light and dark mode" width="88%"></td>
+</tr>
+<tr>
+<td align="center">The <code>/lb</code> results view</td>
+<td align="center">On a phone</td>
+</tr>
+</table>
 
-### Setup & Configuration
-1. Ngrok Configuration
-2. GitHub Webhook Setup
-3. Testing Results
+## How it works
 
-## Project Structure
+<img src="./docs/images/how-it-works.png" alt="A merged PR with an easy, medium or hard label triggers POST /api/github on the Express server, which increments the team's count in MongoDB. A change stream fires, Socket.IO broadcasts leaderboard_update, and the React board re-ranks. Score is easy times 2 plus medium times 4 plus hard times 7 minus penalty." width="100%">
 
-```
-├── Server/                 # Backend Node.js application
-│   ├── config/            # Database and configuration settings
-│   │   └── database.js    # MongoDB connection setup
-│   ├── controllers/       # Request handlers and business logic
-│   │   ├── githubController.js    # GitHub webhook handler
-│   │   └── leaderboardController.js # Leaderboard data management
-│   ├── services/          # Core business logic and services
-│   │   └── websocketManager.js    # Real-time updates handler
-│   ├── utils/            # Helper functions and utilities
-│   └── server.js         # Main server configuration
-│
-├── gdsc-leaderboard/     # Frontend React application
-│   ├── src/
-│   │   ├── App.jsx       # Main application routing and layout
-│   │   ├── LeaderBoard.jsx # Real-time leaderboard display
-│   │   ├── Header.jsx    # Navigation and branding
-│   │   ├── Theme.jsx     # Theme and styling configuration
-│   │   └── assets/       # Images and static resources
-│   ├── public/           # Static assets and index.html
-│   └── vite.config.js    # Vite build configuration
-```
+1. A maintainer merges a pull request that carries an `easy`, `medium` or `hard` label.
+2. GitHub sends the `pull_request` event to `POST /api/github`. The server looks up the team by the PR author's GitHub username and ignores disqualified teams.
+3. The team's `problems_solved.<difficulty>` count goes up by one in MongoDB.
+4. A change stream on the teams collection sees the write. The server recomputes every score and broadcasts `leaderboard_update` over Socket.IO.
+5. Every open board re-sorts, and Framer Motion slides the teams into their new places.
 
-## Features
+Points per merged PR:
 
-### Real-time Updates
-- WebSocket integration for instant updates
-- Live contribution tracking
-- Real-time score calculations
-- Automatic leaderboard position updates
+| Label | Points |
+| --- | --- |
+| `easy` | 2 |
+| `medium` | 4 |
+| `hard` | 7 |
 
-### User Interface
-- Responsive design for all devices
-- Dark/Light theme support
-- Smooth animations and transitions
-- Interactive user profiles
-- Achievement badges and indicators
+A team's score is the sum of its points minus its `penalty`. A negative penalty works as a bonus.
 
-### Backend Architecture
-- Secure API endpoints with Helmet protection
-- MongoDB integration with change streams
-- Efficient WebSocket broadcast system
-- GitHub webhook integration
-- Rate limiting and security measures
+## Tech stack
 
-## Prerequisites
+- **React 18** with **Vite 5**, **Chakra UI** (components and colour mode), **Framer Motion** (re-ranking animation), **React Router**, **Tailwind CSS**
+- **particles.js** for the background
+- **Node.js** and **Express 4**, with **Helmet** and **CORS**
+- **Socket.IO 4** for the live updates, with a per-socket rate limiter (`rate-limiter-flexible`)
+- **MongoDB** with change streams (needs a replica set, so Atlas or a local replica set)
+- **Vercel** for the frontend
 
-### Required Software
-- Node.js (v14 or higher)
-- MongoDB (v4.4 or higher)
-- npm (v6 or higher) or yarn
-- ngrok for local webhook testing
+## Quick start
 
-### Development Tools
-- VS Code (recommended)
-- MongoDB Compass (optional)
-- Postman (for API testing)
+You need **Node.js 18** or newer.
 
-## Detailed Setup Instructions
+The board as it stands today is static and reads the final standings from `src/FINAL-LIST.json`, so the frontend runs on its own:
 
-### 1. Backend Setup
 ```bash
-# Clone the repository
-git clone [your-repo-url]
-
-# Navigate to server directory
-cd Server
-
-# Install dependencies
+git clone https://github.com/Deeptanshuu/gdsc-leaderboard.git
+cd gdsc-leaderboard/gdsc-leaderboard
 npm install
-
-# Create .env file
-cp .env.example .env
-
-# Configure environment variables
-# Edit .env with your MongoDB URI and other settings
-
-# Start the server
-npm start
-```
-
-### 2. Frontend Setup
-```bash
-# Navigate to frontend directory
-cd gdsc-leaderboard
-
-# Install dependencies
-npm install
-
-# Create .env file
-cp .env.example .env
-
-# Configure environment variables
-# Edit .env with your API URL
-
-# Start development server
 npm run dev
 ```
 
-### 3. Ngrok Configuration
-1. Sign up for ngrok account
-2. Download and install ngrok
-3. Configure your authtoken:
-   ```bash
-   ngrok config add-authtoken [your-token]
-   ```
-4. Start ngrok tunnel:
-   ```bash
-   ngrok http 5000
-   ```
+Open http://localhost:5173 for the board and http://localhost:5173/lb for the results view.
 
-### 4. GitHub Webhook Setup
-1. Go to your GitHub repository settings
-2. Navigate to Webhooks section
-3. Add webhook:
-   - Payload URL: Your ngrok URL
-   - Content type: application/json
-   - Events: Pull requests, Push, Issues
+### Running the live server
 
-## Environment Variables
+The server is the real-time setup used during the event. It needs a MongoDB database with a collection of teams shaped like the entries in `FINAL-LIST.json`.
 
-### Backend (.env)
-```env
+```bash
+cd Server
+npm install
+```
+
+Create `Server/.env`:
+
+```bash
+MONGODB_URI=<connection string; the database name is GDSC-1>
+TABLE_NAME=<the teams collection>
 PORT=5000
-MONGODB_URI=your_mongodb_connection_string
-GITHUB_SECRET=your_webhook_secret
-NODE_ENV=development
 ```
 
-### Frontend (.env)
-```env
-VITE_API_URL=http://localhost:5000
-VITE_WS_URL=ws://localhost:5000
-```
+Build the frontend first, since the server serves `gdsc-leaderboard/dist`, then start it:
 
-## Testing
-
-### Load Testing
-The project includes comprehensive load testing setups:
-
-#### K6 Stress Testing
 ```bash
-k6 run k6-stress.js
+npm --prefix ../gdsc-leaderboard run build
+npm start
 ```
-- Tests WebSocket connections
-- Simulates multiple users
-- Measures response times
 
-#### Artillery Load Testing
-```bash
-artillery run artillery.yml
+To receive webhooks on your machine, expose the port with a tunnel such as `ngrok http 5000`. Then add a webhook on each event repository with the payload URL `https://<tunnel>/api/github`, content type `application/json`, and the **Pull requests** event.
+
+The board connects to the server through `VITE_API_ENDPOINT` in `gdsc-leaderboard/.env`. The socket code in `App.jsx` and `LeaderBoard.jsx` is commented out in the static build; uncomment it to go live again.
+
+## Scripts
+
+Run these in `gdsc-leaderboard/`:
+
+| Command | What it does |
+| --- | --- |
+| `npm run dev` | Start the Vite dev server on port 5173 |
+| `npm run build` | Production build into `dist/` |
+| `npm run preview` | Serve the production build |
+| `npm run lint` | ESLint |
+
+In `Server/`, `npm start` runs the server and `npm run dev` runs it with nodemon.
+
+## Project layout
+
 ```
-- HTTP endpoint testing
-- Concurrent user simulation
-- Performance metrics
+gdsc-leaderboard/          React frontend
+  src/App.jsx              the board: ranking, search, team details
+  src/LeaderBoard.jsx      /lb results view: top five and bottom three
+  src/Header.jsx           logos and the theme toggle
+  src/Theme.jsx            Chakra theme and colour mode
+  src/FINAL-LIST.json      final standings, read by the static build
+  public/                  logos and favicon
+  vercel.json              rewrites /lb to the SPA
+Server/                    Express + Socket.IO backend
+  server.js                routes, static files, startup
+  controllers/             GitHub webhook and leaderboard handlers
+  services/teamService.js  team lookup, point updates, score calculation
+  services/websocketManager.js  Socket.IO server and the MongoDB change stream
+  utils/helpers.js         points per difficulty
+  config/database.js       MongoDB connection
+docs/images/               README images
+```
 
 ## Deployment
 
-### Vercel Deployment (Static Frontend Only)
-The application is optimized for Vercel deployment:
-- Frontend: Auto-deployment from main branch
-- Backend: Serverless function configuration
-- Environment variable configuration
-- Custom domain setup
+The frontend deploys to Vercel from `gdsc-leaderboard/`. `vercel.json` rewrites `/lb` to `index.html` so the results view works on a direct visit.
 
-### AWS Deployment (Deprecated)
--Nginx server setup for backend deployment
--Domain DuckDNS
+During the event the server ran on AWS behind Nginx, with a DuckDNS domain. That setup has since been retired. `Server/vercel.json` holds a Vercel config for the server, but Socket.IO and change streams need a long-running process, so a VM or a container host suits it better.
 
+## Status
 
-## Performance Monitoring
+The event ended in October 2024 and the board now shows the final standings. The server code is kept as it ran, with a few rough edges to fix before reusing it:
 
-- WebSocket connection metrics
-- Database query performance
-- API response times
-- Real-time user count
-
+- `getDifficultyAndPoints()` in `Server/utils/helpers.js` now returns the whole points table, while `githubController.js` still expects `{ difficulty, points }` for a PR's labels.
+- `app.get('/*')` in `server.js` is registered before `/api/leaderboard`, so that route returns the SPA instead of JSON.
+- The `SIGINT` handler clears `broadcastInterval`, which is commented out.
