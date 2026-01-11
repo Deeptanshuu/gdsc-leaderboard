@@ -1,10 +1,11 @@
 ﻿<div align="center">
 
-# ▲ Hacktoberfest Leaderboard
+<img src="./docs/images/banner.png" alt="Hacktoberfest Leaderboard by GDG RAIT: merged pull requests in, team rankings out, beside the board in dark mode" width="100%">
+
+<br>
+<br>
 
 **The live scoreboard for GDG RAIT's Hacktoberfest 2024: a maintainer merges a pull request, and every open board re-ranks the teams on the spot.**
-
-<img src="./docs/images/leaderboard-dark.png" alt="The leaderboard in dark mode: the GDG, DY Patil and IIC logos over an orange particle background, the Hacktoberfest Leaderboard title, a search bar, and teams ranked by score with member avatars" width="100%">
 
 </div>
 
@@ -13,6 +14,8 @@
 ## What you get
 
 **A board that ranks itself.** 14 teams and 51 students from Ramrao Adik Institute of Technology, sorted by score, with gold, silver and bronze badges for the top three. When a merged PR changes a score, the teams slide into their new places without a reload.
+
+<img src="./docs/images/leaderboard-light.png" alt="The leaderboard in light mode: the GDG, DY Patil and IIC logos over an orange particle background, the Hacktoberfest Leaderboard title, a search bar, and teams ranked by score with member avatars" width="100%">
 
 - **Click a team** to open it.
 - **Type in the search bar** to filter by team name, member name or GitHub username.
