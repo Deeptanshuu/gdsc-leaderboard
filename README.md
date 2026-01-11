@@ -1,81 +1,60 @@
 ﻿<div align="center">
 
-<img src="./docs/images/banner.png" alt="Hacktoberfest Leaderboard by GDG RAIT: merged pull requests in, team rankings out, beside the dark-mode board" width="100%">
+# ▲ Hacktoberfest Leaderboard
+
+**The live scoreboard for GDG RAIT's Hacktoberfest 2024: a maintainer merges a pull request, and every open board re-ranks the teams on the spot.**
+
+<img src="./docs/images/leaderboard-dark.png" alt="The leaderboard in dark mode: the GDG, DY Patil and IIC logos over an orange particle background, the Hacktoberfest Leaderboard title, a search bar, and teams ranked by score with member avatars" width="100%">
 
 </div>
 
-<br>
+---
 
-The leaderboard for **GDG RAIT's Hacktoberfest 2024** event at Ramrao Adik Institute of Technology. 14 teams and 51 students raised pull requests against event repositories. Every merged PR earned points by difficulty, and the board re-ranked itself in every open browser the moment a PR was merged.
+## What you get
 
-During the event a GitHub webhook fed an Express server, MongoDB stored the scores, and Socket.IO pushed each change to the React board. Once the event closed, the final standings were frozen into `FINAL-LIST.json` and the frontend became a static site on Vercel.
+**A board that ranks itself.** 14 teams and 51 students from Ramrao Adik Institute of Technology, sorted by score, with gold, silver and bronze badges for the top three. When a merged PR changes a score, the teams slide into their new places without a reload.
 
-![The leaderboard in light mode: the GDG, DY Patil and IIC logos, the Hacktoberfest Leaderboard title, a search bar, and teams ranked by score with member avatars](./docs/images/leaderboard-light.png)
-
-## What's on the board
-
-| | |
-| --- | --- |
-| **Live ranking** | Teams sorted by score, with gold, silver and bronze badges for the top three |
-| **Team details** | Open a team to see its members, hard problems solved and GitHub username |
-| **Search** | Filter by team name, member name or GitHub username as you type |
-| **Results view** | `/lb` shows the top five and the bottom three, for announcing results on a projector |
-| **Light and dark** | Theme toggle in the header, with an animated particle background in both |
-| **Phones** | Scores stack under the avatars and the card goes full width on small screens |
+- **Click a team** to open it.
+- **Type in the search bar** to filter by team name, member name or GitHub username.
+- **Hit the moon** in the header for dark mode. The orange particle background runs in both.
 
 <table>
 <tr>
-<td width="50%"><img src="./docs/images/team-details-dark.png" alt="Dark mode with Bit by Bit opened: four team members, 6 hard problems solved and the GitHub username"></td>
-<td width="50%"><img src="./docs/images/search.png" alt="Searching for 'code' narrows the board to Code Bots, Pixel Coders, Pseudo Coders and Chintu Coders"></td>
-</tr>
-<tr>
-<td align="center">A team opened in dark mode</td>
-<td align="center">Searching for "code"</td>
-</tr>
-<tr>
-<td width="50%"><img src="./docs/images/results-dark.png" alt="The /lb results view: the top five teams, a dotted divider, then the bottom three outlined in red"></td>
-<td width="50%" align="center"><img src="./docs/images/mobile.png" alt="The board on a phone in light and dark mode" width="88%"></td>
-</tr>
-<tr>
-<td align="center">The <code>/lb</code> results view</td>
-<td align="center">On a phone</td>
+<td width="52%" valign="top">
+<img src="./docs/images/team-details-dark.png" alt="Dark mode with Bit by Bit opened: four team members, 6 hard problems solved and the GitHub username @pathakjatin" width="100%">
+</td>
+<td valign="top">
+
+- **Rank and score**: the badge, the team name, everyone's avatars and the score, on one row.
+- **Team members**: each member with their initials avatar.
+- **Problems solved**: how many hard problems the team landed.
+- **GitHub username**: the account whose merged PRs count for the team.
+
+</td>
 </tr>
 </table>
 
-## How it works
+**Search as you type.** The list narrows with every key, and the ranks stay the team's real ranks, so `#7` is still seventh overall.
 
-<img src="./docs/images/how-it-works.png" alt="A merged PR with an easy, medium or hard label triggers POST /api/github on the Express server, which increments the team's count in MongoDB. A change stream fires, Socket.IO broadcasts leaderboard_update, and the React board re-ranks. Score is easy times 2 plus medium times 4 plus hard times 7 minus penalty." width="100%">
+<img src="./docs/images/search.png" alt="Searching for 'code' narrows the board to #3 Code Bots, #7 Pixel Coders, #10 Pseudo Coders and #11 Chintu Coders" width="100%">
 
-1. A maintainer merges a pull request that carries an `easy`, `medium` or `hard` label.
-2. GitHub sends the `pull_request` event to `POST /api/github`. The server looks up the team by the PR author's GitHub username and ignores disqualified teams.
-3. The team's `problems_solved.<difficulty>` count goes up by one in MongoDB.
-4. A change stream on the teams collection sees the write. The server recomputes every score and broadcasts `leaderboard_update` over Socket.IO.
-5. Every open board re-sorts, and Framer Motion slides the teams into their new places.
+**A results view for the projector.** `/lb` drops the search bar and shows the top five, a break, then the bottom three outlined in red: the order you announce results in.
 
-Points per merged PR:
+<table>
+<tr>
+<td width="60%" valign="top">
+<img src="./docs/images/results-dark.png" alt="The /lb results view: the top five teams, a dotted divider, then the bottom three outlined in red" width="100%">
+</td>
+<td valign="top" align="center">
+<img src="./docs/images/mobile.png" alt="The board on a phone in light and dark mode" width="100%">
+<br><sub>On a phone, in both themes</sub>
+</td>
+</tr>
+</table>
 
-| Label | Points |
-| --- | --- |
-| `easy` | 2 |
-| `medium` | 4 |
-| `hard` | 7 |
+## Run it
 
-A team's score is the sum of its points minus its `penalty`. A negative penalty works as a bonus.
-
-## Tech stack
-
-- **React 18** with **Vite 5**, **Chakra UI** (components and colour mode), **Framer Motion** (re-ranking animation), **React Router**, **Tailwind CSS**
-- **particles.js** for the background
-- **Node.js** and **Express 4**, with **Helmet** and **CORS**
-- **Socket.IO 4** for the live updates, with a per-socket rate limiter (`rate-limiter-flexible`)
-- **MongoDB** with change streams (needs a replica set, so Atlas or a local replica set)
-- **Vercel** for the frontend
-
-## Quick start
-
-You need **Node.js 18** or newer.
-
-The board as it stands today is static and reads the final standings from `src/FINAL-LIST.json`, so the frontend runs on its own:
+The board today is a static snapshot of the final standings, read from `src/FINAL-LIST.json`, so the frontend runs on its own:
 
 ```bash
 git clone https://github.com/Deeptanshuu/gdsc-leaderboard.git
@@ -84,16 +63,34 @@ npm install
 npm run dev
 ```
 
-Open http://localhost:5173 for the board and http://localhost:5173/lb for the results view.
+Open http://localhost:5173.
 
-### Running the live server
+## Use
 
-The server is the real-time setup used during the event. It needs a MongoDB database with a collection of teams shaped like the entries in `FINAL-LIST.json`.
+| Where | What it does |
+| --- | --- |
+| `/` | The full board, with search and team details |
+| `/lb` | The results view: top five and bottom three |
+| Moon / sun button | Switch between light and dark mode |
+| Search bar | Filter by team, member or GitHub username |
 
-```bash
-cd Server
-npm install
-```
+## How it scores
+
+<img src="./docs/images/how-it-works.png" alt="A merged PR with an easy, medium or hard label triggers POST /api/github on the Express server, which increments the team's count in MongoDB. A change stream fires, Socket.IO broadcasts leaderboard_update, and the React board re-ranks." width="100%">
+
+During the event, a merged PR travelled from GitHub to every screen in five steps.
+
+- **The label sets the points.** Each event PR carried `easy` (2 points), `medium` (4) or `hard` (7).
+- **The webhook finds the team.** GitHub sends the `pull_request` event to `POST /api/github`. On a merge, the server matches the PR author to a team's GitHub username and skips disqualified teams.
+- **MongoDB counts it.** The team's `problems_solved.<difficulty>` goes up by one.
+- **A change stream spreads it.** The server watches the teams collection, recomputes every score on each write, and broadcasts `leaderboard_update` over Socket.IO.
+- **The board re-sorts.** Each open browser re-ranks the list, and Framer Motion animates the moves.
+
+**Score** is `easy × 2 + medium × 4 + hard × 7 − penalty`. A negative penalty works as a bonus.
+
+## Live mode
+
+To run it live again you need a MongoDB replica set (Atlas works; change streams need one) with a teams collection shaped like the entries in `FINAL-LIST.json`.
 
 Create `Server/.env`:
 
@@ -103,61 +100,35 @@ TABLE_NAME=<the teams collection>
 PORT=5000
 ```
 
-Build the frontend first, since the server serves `gdsc-leaderboard/dist`, then start it:
+Build the board, since the server serves `gdsc-leaderboard/dist`, then start the server:
 
 ```bash
-npm --prefix ../gdsc-leaderboard run build
-npm start
+npm --prefix gdsc-leaderboard install
+npm --prefix gdsc-leaderboard run build
+cd Server && npm install && npm start
 ```
 
-To receive webhooks on your machine, expose the port with a tunnel such as `ngrok http 5000`. Then add a webhook on each event repository with the payload URL `https://<tunnel>/api/github`, content type `application/json`, and the **Pull requests** event.
+Expose the port with a tunnel such as `ngrok http 5000`, and add a webhook to each event repository: payload URL `https://<tunnel>/api/github`, content type `application/json`, **Pull requests** events. On the board, set `VITE_API_ENDPOINT` in `gdsc-leaderboard/.env` and uncomment the Socket.IO block in `App.jsx`.
 
-The board connects to the server through `VITE_API_ENDPOINT` in `gdsc-leaderboard/.env`. The socket code in `App.jsx` and `LeaderBoard.jsx` is commented out in the static build; uncomment it to go live again.
+During the event the server ran on AWS behind Nginx with a DuckDNS domain, and the board deployed to Vercel, where `vercel.json` rewrites `/lb` to the app.
 
-## Scripts
-
-Run these in `gdsc-leaderboard/`:
+## Develop
 
 | Command | What it does |
 | --- | --- |
-| `npm run dev` | Start the Vite dev server on port 5173 |
+| `npm run dev` | Vite dev server on port 5173 |
 | `npm run build` | Production build into `dist/` |
 | `npm run preview` | Serve the production build |
 | `npm run lint` | ESLint |
 
-In `Server/`, `npm start` runs the server and `npm run dev` runs it with nodemon.
+Run them in `gdsc-leaderboard/`. In `Server/`, `npm run dev` starts the server under nodemon.
 
-## Project layout
-
-```
-gdsc-leaderboard/          React frontend
-  src/App.jsx              the board: ranking, search, team details
-  src/LeaderBoard.jsx      /lb results view: top five and bottom three
-  src/Header.jsx           logos and the theme toggle
-  src/Theme.jsx            Chakra theme and colour mode
-  src/FINAL-LIST.json      final standings, read by the static build
-  public/                  logos and favicon
-  vercel.json              rewrites /lb to the SPA
-Server/                    Express + Socket.IO backend
-  server.js                routes, static files, startup
-  controllers/             GitHub webhook and leaderboard handlers
-  services/teamService.js  team lookup, point updates, score calculation
-  services/websocketManager.js  Socket.IO server and the MongoDB change stream
-  utils/helpers.js         points per difficulty
-  config/database.js       MongoDB connection
-docs/images/               README images
-```
-
-## Deployment
-
-The frontend deploys to Vercel from `gdsc-leaderboard/`. `vercel.json` rewrites `/lb` to `index.html` so the results view works on a direct visit.
-
-During the event the server ran on AWS behind Nginx, with a DuckDNS domain. That setup has since been retired. `Server/vercel.json` holds a Vercel config for the server, but Socket.IO and change streams need a long-running process, so a VM or a container host suits it better.
+The board is **React 18** on **Vite 5** with **Chakra UI**, **Framer Motion** and **particles.js**. The server is **Express 4** with **Socket.IO 4**, **Helmet** and the **MongoDB** driver. The board lives in `gdsc-leaderboard/src/` (`App.jsx`, `LeaderBoard.jsx` for `/lb`, `Header.jsx`). The webhook is in `Server/controllers/githubController.js`, scoring in `Server/services/teamService.js`, and the change stream in `Server/services/websocketManager.js`.
 
 ## Status
 
-The event ended in October 2024 and the board now shows the final standings. The server code is kept as it ran, with a few rough edges to fix before reusing it:
+The event closed in October 2024, and the board shows the final standings. The server is kept as it ran, with three things to fix before reusing it:
 
-- `getDifficultyAndPoints()` in `Server/utils/helpers.js` now returns the whole points table, while `githubController.js` still expects `{ difficulty, points }` for a PR's labels.
-- `app.get('/*')` in `server.js` is registered before `/api/leaderboard`, so that route returns the SPA instead of JSON.
+- `getDifficultyAndPoints()` in `Server/utils/helpers.js` returns the whole points table, while `githubController.js` still expects `{ difficulty, points }` for a PR's labels.
+- `app.get('/*')` in `server.js` is registered before `/api/leaderboard`, so that route returns the page instead of JSON.
 - The `SIGINT` handler clears `broadcastInterval`, which is commented out.
