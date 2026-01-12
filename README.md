@@ -7,6 +7,8 @@
 
 **The live scoreboard for GDG RAIT's Hacktoberfest 2024: a maintainer merges a pull request, and every open board re-ranks the teams on the spot.**
 
+**[Live board](https://gdg-rait.vercel.app)** &nbsp;&nbsp;|&nbsp;&nbsp; **[Results view](https://gdg-rait.vercel.app/lb)**
+
 </div>
 
 ---
