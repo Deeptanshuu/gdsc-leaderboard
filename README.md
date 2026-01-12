@@ -1,6 +1,6 @@
 ﻿<div align="center">
 
-<img src="./docs/images/banner.png" alt="Hacktoberfest Leaderboard by GDG RAIT: merged pull requests in, team rankings out, beside the board in dark mode" width="100%">
+<img src="./docs/images/banner.png" alt="Hacktoberfest Leaderboard, GDG RAIT, October 2024: 14 teams and 51 students scored live from merged pull requests, beside the top six teams on the board" width="100%">
 
 <br>
 <br>
@@ -15,7 +15,7 @@
 
 **A board that ranks itself.** 14 teams and 51 students from Ramrao Adik Institute of Technology, sorted by score, with gold, silver and bronze badges for the top three. When a merged PR changes a score, the teams slide into their new places without a reload.
 
-<img src="./docs/images/leaderboard-light.png" alt="The leaderboard in light mode: the GDG, DY Patil and IIC logos over an orange particle background, the Hacktoberfest Leaderboard title, a search bar, and teams ranked by score with member avatars" width="100%">
+<img src="./docs/images/leaderboard-dark.png" alt="The leaderboard in dark mode: the GDG, DY Patil and IIC logos over an orange particle background, the Hacktoberfest Leaderboard title, a search bar, and teams ranked by score with member avatars" width="100%">
 
 - **Click a team** to open it.
 - **Type in the search bar** to filter by team name, member name or GitHub username.
@@ -79,7 +79,7 @@ Open http://localhost:5173.
 
 ## How it scores
 
-<img src="./docs/images/how-it-works.png" alt="A merged PR with an easy, medium or hard label triggers POST /api/github on the Express server, which increments the team's count in MongoDB. A change stream fires, Socket.IO broadcasts leaderboard_update, and the React board re-ranks." width="100%">
+<img src="./docs/images/how-it-works.png" alt="GitHub sends a webhook for a merged, labelled PR to POST /api/github on Express, which adds one solved problem to the team in MongoDB. A change stream fires, Socket.IO broadcasts leaderboard_update, and the board re-sorts in every open browser. Score is 2 times easy plus 4 times medium plus 7 times hard minus penalty." width="100%">
 
 During the event, a merged PR travelled from GitHub to every screen in five steps.
 
