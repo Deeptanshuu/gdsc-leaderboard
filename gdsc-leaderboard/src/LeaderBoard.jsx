@@ -1,7 +1,5 @@
 /* eslint-disable no-unused-vars */
 /* eslint-disable react/prop-types */
-import { useEffect, useState } from 'react';
-//import io from 'socket.io-client';
 import {
   Box,
   Text,
@@ -22,10 +20,10 @@ import {
 } from '@chakra-ui/react';
 import Header from './Header.jsx';
 import './App.css';
-import data from './FINAL-LIST.json';
+import { useLeaderboard } from './hooks/useLeaderboard';
 
 const LeaderBoard = () => {
-  const [leaderboard, setLeaderboard] = useState([]);
+  const leaderboard = useLeaderboard().board.ranked;
   const bgColor = useColorModeValue('white', 'black');
   const hoverBgColor = useColorModeValue('gray.200', 'gray.800');
   const textColor = useColorModeValue('black', 'white');
@@ -33,66 +31,6 @@ const LeaderBoard = () => {
   const titleTextColor = useColorModeValue('white', 'black');
   const borderColor = useColorModeValue('#ff6600', '#ff6600');
 
-  useEffect(() => {
-    // const apiEndpoint = import.meta.env.VITE_API_ENDPOINT;
-    // const socket = io(`${apiEndpoint}`);
-    // socket.on('connect', () => {
-    //   console.log('Connected to WebSocket server');
-    // });
-    // socket.on('leaderboard_update', (data) => {
-    //   const sortedLeaderboard = data
-    //     .map((team) => ({
-    //       name: team.team_name,
-    //       score: team.score,
-    //       teamMembers: team.team_members.map((member) => ({ name: member.name })),
-    //       easySolved: team.problems_solved.easy || 0,
-    //       mediumSolved: team.problems_solved.medium || 0,
-    //       hardSolved: team.problems_solved.hard || 0,
-    //       githubUsername: team.github_username,
-    //     }))
-    //     .sort((a, b) => b.score - a.score);
-
-    //   setLeaderboard(sortedLeaderboard);
-    // });
-    // return () => {
-    //   socket.disconnect();
-    // };
-    
-
-    const updatedLeaderboard = data.map(team => {
-      // Calculate the score based on hard problems solved (7 points per hard problem)
-      const hardProblemScore = (team.problems_solved.hard || 0) * 7;
-    
-      // Apply penalty logic: if penalty is negative, it's treated as a bonus (positive)
-      const adjustedPenalty = team.penalty 
-
-      // Add hard problem score and adjust the final score
-      const totalScore = hardProblemScore + (team.score || 0) - adjustedPenalty;
-    
-      // Return updated team object
-      return {
-        ...team,
-        totalScore, // Add the calculated total score
-      };
-    });
-    
-    // Sort by total score
-    const sortedLeaderboard = updatedLeaderboard
-      //.filter(team => team.disqualified === false)
-      .map(team => ({
-        name: team.team_name,
-        score: team.totalScore, // Use the new total score
-        teamMembers: team.team_members.map(member => ({ name: member.name })),
-        easySolved: team.problems_solved.easy || 0,
-        mediumSolved: team.problems_solved.medium || 0,
-        hardSolved: team.problems_solved.hard || 0,
-        githubUsername: team.github_username,
-      }))
-      .sort((a, b) => b.score - a.score); // Sort by score in descending order
-    
-    setLeaderboard(sortedLeaderboard);
-
-  }, []);
 
   const LeaderboardItem = ({ rank, name, score, teamMembers, easySolved, mediumSolved, hardSolved, githubUsername, isBottomThree }) => {
     const badgeColor = (() => {
@@ -247,13 +185,13 @@ const LeaderBoard = () => {
               {top3.map((participant, index) => (
                 <LeaderboardItem
                   key={`${participant.name}-top-${index}`}
-                  rank={index +1}
+                  rank={participant.rank}
                   name={participant.name}
                   score={participant.score}
-                  teamMembers={participant.teamMembers}
-                  easySolved={participant.easySolved}
-                  mediumSolved={participant.mediumSolved}
-                  hardSolved={participant.hardSolved}
+                  teamMembers={participant.members.map((name) => ({ name }))}
+                  easySolved={participant.solved.easy}
+                  mediumSolved={participant.solved.medium}
+                  hardSolved={participant.solved.hard}
                   githubUsername={participant.githubUsername}
                 />
               ))}
@@ -267,13 +205,13 @@ const LeaderBoard = () => {
               {bottom3.map((participant, index) => (
                 <LeaderboardItem
                   key={`${participant.name}-bottom-${index}`}
-                  rank={leaderboard.length - 3 + index + 1}
+                  rank={participant.rank}
                   name={participant.name}
                   score={participant.score}
-                  teamMembers={participant.teamMembers}
-                  easySolved={participant.easySolved}
-                  mediumSolved={participant.mediumSolved}
-                  hardSolved={participant.hardSolved}
+                  teamMembers={participant.members.map((name) => ({ name }))}
+                  easySolved={participant.solved.easy}
+                  mediumSolved={participant.solved.medium}
+                  hardSolved={participant.solved.hard}
                   githubUsername={participant.githubUsername}
                   isBottomThree={isBottomThree}
                 />

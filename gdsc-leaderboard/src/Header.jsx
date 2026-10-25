@@ -1,6 +1,8 @@
 //Header.jsx
 import { Box, Flex, Text, Image, useColorMode, Button, useColorModeValue } from '@chakra-ui/react';
 import { MoonIcon, SunIcon } from '@chakra-ui/icons';
+import { NavLink } from 'react-router-dom';
+import { Sparkles } from 'lucide-react';
 
 const Header = () => {
   const { colorMode, toggleColorMode } = useColorMode();
@@ -51,6 +53,18 @@ const Header = () => {
         </Flex>
 
         <Flex alignItems="center">
+          <Button
+            as={NavLink}
+            to="/reveal"
+            size="sm"
+            variant="ghost"
+            leftIcon={<Sparkles size={14} />}
+            mr={3}
+            _hover={{ bg: hoverBg }}
+            color={textColor}
+          >
+            Reveal
+          </Button>
           <Text
             display={{ base: 'none', md: 'block' }}
             fontSize={{ base: 'xs', md: 'sm' }}

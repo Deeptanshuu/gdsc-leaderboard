@@ -6,6 +6,40 @@ A real-time leaderboard application for tracking and displaying GitHub contribut
 
 The GDSC Leaderboard tracks GitHub activities in real-time, displaying member contributions and achievements. It features a modern, responsive interface with live updates and secure backend integration.
 
+## Experimental branch: Leaderboard 2.0
+
+This branch revives the real-time pipeline and adds a lot on top of it. You can run it locally with no MongoDB and no ngrok:
+
+```bash
+# 1. Build the frontend once (the server serves it)
+cd gdsc-leaderboard && npm install && npm run build
+
+# 2. Start the server. With no MONGODB_URI it uses an in-memory store seeded from FINAL-LIST.json
+cd ../Server && npm install && GITHUB_SECRET=demo npm start
+
+# 3. Open http://localhost:5000/?live=http://localhost:5000
+
+# 4. In another terminal, fire signed fake "merged PR" webhooks and watch the board react
+GITHUB_SECRET=demo npm run simulate -- --count 30 --interval 1500
+```
+
+**Frontend**
+- Animated podium for the top 3 with confetti, a stats strip, and count-up scores
+- Tied scores share a rank (1, 2, 2, 4). Disqualified teams sit in their own collapsed section instead of being ranked last
+- Per-team score breakdown (points per difficulty plus time bonus or penalty), GitHub link, and a copyable deep link (`/#team-slug`)
+- `?live` streams from a server over Socket.IO, with rank-change toasts and ▲▼ / +points markers. Without it, the static final results are shown and nothing touches the network
+- `/reveal` is an awards-show mode for a projector. It reveals teams from last place to first, with drumrolls for the podium and a countdown plus confetti for the champions (`Space` next, `←` back, `R` restart, `F` fullscreen)
+- Press `/` to search and `Esc` to clear
+- All scoring lives in `src/lib/leaderboard.js`, with tests (`npm test`)
+
+**Backend fixes**
+- Merged PRs were scored as `problems_solved.undefined` because the PR's difficulty labels were never read. They now are, and the hardest label wins
+- `GET /api/leaderboard` was shadowed by the SPA catch-all route and returned `index.html`
+- Webhooks are verified against `X-Hub-Signature-256` when `GITHUB_SECRET` is set
+- GitHub redeliveries no longer double-count a PR
+- Ctrl-C no longer crashes on an undefined `broadcastInterval`
+- Pluggable `memory` / `mongo` store (`DATA_STORE`), plus API tests (`npm test`)
+
 ## Project Gallery
 
 ![image](https://github.com/user-attachments/assets/6117a5c5-78a0-42fa-b7a7-db23c0189009)

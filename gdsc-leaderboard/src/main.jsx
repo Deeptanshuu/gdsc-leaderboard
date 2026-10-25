@@ -4,6 +4,7 @@ import { ChakraProvider, ColorModeScript  } from '@chakra-ui/react'
 import { BrowserRouter, Route, Routes } from 'react-router-dom'
 import App from './App.jsx'
 import LeaderBoard from './LeaderBoard.jsx'
+import Reveal from './pages/Reveal.jsx'
 import './index.css'
 import Theme from './Theme.jsx'
 
@@ -15,6 +16,7 @@ createRoot(document.getElementById('root')).render(
         <Routes>
           <Route path="/" element={<App />} />
           <Route path="/lb" element={<LeaderBoard />} />
+          <Route path="/reveal" element={<Reveal />} />
         </Routes>
       </BrowserRouter>
     </ChakraProvider>

@@ -1,9 +1,8 @@
 {
-    "rewrites": [
-      {
-        "source": "/lb",
-        "destination": "/index.html"
-      }
-    ]
-  }
-  
+  "rewrites": [
+    {
+      "source": "/(.*)",
+      "destination": "/index.html"
+    }
+  ]
+}
