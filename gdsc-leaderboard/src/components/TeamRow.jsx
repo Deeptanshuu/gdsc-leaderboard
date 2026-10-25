@@ -106,8 +106,8 @@ export default function TeamRow({ team, topScore, mover, isExpanded }) {
   const score = useCountUp(team.score);
   const toast = useToast();
   const textColor = useColorModeValue('black', 'gray.100');
-  const panelBg = useColorModeValue('gray.100', 'gray.900');
-  const hoverBg = useColorModeValue('gray.200', 'gray.800');
+  const panelBg = useColorModeValue('blackAlpha.50', 'whiteAlpha.100');
+  const hoverBg = useColorModeValue('blackAlpha.100', 'whiteAlpha.50');
   const trackBg = useColorModeValue('gray.200', 'gray.700');
   const share = topScore > 0 ? Math.max(0, team.score) / topScore : 0;
 
@@ -132,6 +132,7 @@ export default function TeamRow({ team, topScore, mover, isExpanded }) {
         style={{ borderRadius: 6 }}
       >
         <AccordionButton
+          className="team-row"
           _expanded={{ bg: panelBg, color: '#ff8c00' }}
           _hover={{ bg: hoverBg }}
           borderRadius="md"

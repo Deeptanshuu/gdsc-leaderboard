@@ -23,6 +23,13 @@ cd ../Server && npm install && GITHUB_SECRET=demo npm start
 GITHUB_SECRET=demo npm run simulate -- --count 30 --interval 1500
 ```
 
+**Look and feel**
+- A hand-written WebGL shader replaces particles.js: an aurora sky, a striped synthwave sun and a neon grid floor, with a glow that follows the cursor (`src/components/ShaderBackground.jsx`). With reduced motion it renders one still frame
+- Floating glass nav with an animated rainbow border, a sliding active tab and a live clock, plus a news ticker built from the standings
+- `Ctrl/⌘ K` command palette: jump to any team or page, switch theme, go live
+- Glitching title, glass cards, a cursor spotlight on rows, dark by default
+- HYPER MODE: the ⚡ button or the Konami code (↑↑↓↓←→←→BA)
+
 **Frontend**
 - Animated podium for the top 3 with confetti, a stats strip, and count-up scores
 - Tied scores share a rank (1, 2, 2, 4). Disqualified teams sit in their own collapsed section instead of being ranked last

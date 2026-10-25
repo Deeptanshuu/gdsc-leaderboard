@@ -9,8 +9,10 @@ import StatsStrip from './components/StatsStrip';
 import TeamRow from './components/TeamRow';
 import LiveBadge from './components/LiveBadge';
 import DisqualifiedList from './components/DisqualifiedList';
+import Footer from './components/Footer';
 import { useLeaderboard } from './hooks/useLeaderboard';
 import { ordinal } from './lib/brand';
+import { FOCUS_TEAM_EVENT } from './lib/vibes';
 
 const matchesQuery = (team, query) => {
   if (!query) return true;
@@ -28,11 +30,21 @@ const App = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [expandedIds, setExpandedIds] = useState(() => new Set());
 
-  const announce = useCallback(
-    (changes) => {
-      changes
-        .filter((change) => change.score !== change.prevScore)
-        .forEach((change) => {
+  const { board, stats, movers, feed, status, liveUrl } = useLeaderboard();
+
+  // Toast each new live event once.
+  const lastAnnounced = useRef(feed[0]?.key ?? null);
+  useEffect(() => {
+    const fresh = [];
+    for (const event of feed) {
+      if (event.key === lastAnnounced.current) break;
+      fresh.push(event);
+    }
+    if (feed.length) lastAnnounced.current = feed[0].key;
+    fresh
+      .reverse()
+      .filter((change) => change.score !== change.prevScore)
+      .forEach((change) => {
           const moved = change.climbed > 0 ? ` and climbs to ${ordinal(change.rank)}!` : '';
           toast({
             title: `${change.name} +${change.score - change.prevScore}`,
@@ -42,17 +54,17 @@ const App = () => {
             duration: 4000,
           });
         });
-    },
-    [toast]
+  }, [feed, toast]);
+
+  const bgColor = useColorModeValue('rgba(255,255,255,0.8)', 'rgba(10,4,20,0.72)');
+  const cardShadow = useColorModeValue(
+    '20px 20px 0 rgba(255, 102, 0, 0.85), 0 0 50px rgba(255, 102, 0, 0.2)',
+    '20px 20px 0 rgba(255, 102, 0, 0.85), 0 0 80px rgba(255, 46, 136, 0.35)'
   );
-
-  const { board, stats, movers, status, liveUrl } = useLeaderboard({ onChanges: announce });
-
-  const bgColor = useColorModeValue('white', 'black');
   const textColor = useColorModeValue('black', 'gray.100');
   const titleTextColor = useColorModeValue('white', 'black');
   const accent = useColorModeValue('#ff6600', '#ff8c00');
-  const searchBg = useColorModeValue('gray.100', 'gray.700');
+  const searchBg = useColorModeValue('blackAlpha.50', 'whiteAlpha.100');
   const mutedText = useColorModeValue('gray.500', 'gray.400');
 
   const visibleTeams = useMemo(
@@ -89,6 +101,25 @@ const App = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  // The command palette asks for a team via a window event.
+  useEffect(() => {
+    const onFocusTeam = (event) => {
+      const team = board.ranked.find((t) => t.slug === event.detail);
+      if (team) focusTeam(team);
+    };
+    window.addEventListener(FOCUS_TEAM_EVENT, onFocusTeam);
+    return () => window.removeEventListener(FOCUS_TEAM_EVENT, onFocusTeam);
+  }, [board.ranked, focusTeam]);
+
+  // Spotlight that follows the cursor across team rows.
+  const trackSpotlight = (event) => {
+    const row = event.target.closest?.('.team-row');
+    if (!row) return;
+    const rect = row.getBoundingClientRect();
+    row.style.setProperty('--mx', `${event.clientX - rect.left}px`);
+    row.style.setProperty('--my', `${event.clientY - rect.top}px`);
+  };
+
   // "/" focuses search, Escape clears it.
   useEffect(() => {
     const onKey = (event) => {
@@ -110,17 +141,19 @@ const App = () => {
       <Header />
       <div className="py-10">
         <Box
+          className="board-card"
           maxW="4xl"
           mx="auto"
           bg={bgColor}
-          boxShadow={{ base: 'none', md: '20px 20px rgba(255, 102, 0, 0.8), 0 1px 3px rgba(255, 102, 0, 0.8)' }}
+          backdropFilter="blur(16px) saturate(140%)"
+          boxShadow={{ base: 'none', md: cardShadow }}
           border={{ base: 'none', md: '3px solid #ff6600' }}
           borderTop={{ base: '3px solid #ff6600', md: '3px solid #ff6600' }}
           borderBottom={{ base: '3px solid #ff6600', md: '3px solid #ff6600' }}
           borderRadius={{ base: 'none', md: '10px' }}
           overflow="hidden"
         >
-          <Box px={{ base: 4, md: 6 }} py={{ base: 4, md: 6 }} bg={bgColor} color={textColor}>
+          <Box px={{ base: 4, md: 6 }} py={{ base: 4, md: 6 }} color={textColor}>
             <Text
               as="h1"
               fontWeight="bold"
@@ -129,7 +162,9 @@ const App = () => {
               color={titleTextColor}
               textShadow={`5px 5px 0 ${accent}, -1px -1px 0 ${accent}, 1px -1px 0 ${accent}, -1px 1px 0 ${accent}`}
             >
-              Hacktoberfest <br /> Leaderboard
+              <span className="glitch" data-text="Hacktoberfest">Hacktoberfest</span>
+              <br />
+              <span className="glitch" data-text="Leaderboard">Leaderboard</span>
             </Text>
             <LiveBadge status={status} liveUrl={liveUrl} />
 
@@ -163,7 +198,7 @@ const App = () => {
               <Kbd display={{ base: 'none', md: 'inline-block' }}>/</Kbd>
             </Flex>
 
-            <Accordion allowMultiple index={expandedIndexes} onChange={handleAccordionChange}>
+            <Accordion allowMultiple index={expandedIndexes} onChange={handleAccordionChange} onMouseMove={trackSpotlight}>
               <AnimatePresence initial={false}>
                 {visibleTeams.map((team, index) => (
                   <motion.div
@@ -194,6 +229,7 @@ const App = () => {
           </Box>
         </Box>
       </div>
+      <Footer />
     </>
   );
 };

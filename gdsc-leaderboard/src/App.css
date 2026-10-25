@@ -1,36 +1,176 @@
 @import url('https://fonts.googleapis.com/css2?family=Playfair+Display&family=Rubik+Mono+One&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@500;700;800&display=swap');
 
 #root {
   min-height: 100vh;
   position: relative;
-  background-size: cover;
-  overflow: hidden;
+  /* clip, not hidden: hidden makes #root a scroll container and breaks the sticky nav */
+  overflow-x: clip;
 }
-
-#particles-js {
-  position: fixed; 
-  top: 0;
-  left: 0;
-  width: 100vw; 
-  height: 100vh;
-  z-index: -1;
-  background-size: cover;
-  background-repeat: no-repeat;
-}
-
 
 /* Heading with Rubik Mono */
 h1,h2 {
     font-family: 'Rubik Mono One', sans-serif;
     font-optical-sizing: auto;
   }
-  
-  /* Rest of the content with Playfair Display */
+
 body, p {
     font-family: "Montserrat", sans-serif;
     letter-spacing: 0.025em;
     font-optical-sizing: auto;
 }
-  
 
+::selection {
+  background: #ff6600;
+  color: #000;
+}
+
+/* Film grain over everything (the shader adds its own; this one stays crisp at full res). */
+.grain {
+  position: fixed;
+  inset: -50%;
+  z-index: 0;
+  pointer-events: none;
+  opacity: 0.06;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  animation: grain 0.8s steps(4) infinite;
+}
+
+@keyframes grain {
+  0% { transform: translate(0, 0); }
+  25% { transform: translate(-3%, 2%); }
+  50% { transform: translate(2%, -3%); }
+  75% { transform: translate(-1%, 3%); }
+  100% { transform: translate(3%, -1%); }
+}
+
+/* Animated rainbow ring around the floating nav. */
+@property --angle {
+  syntax: '<angle>';
+  initial-value: 0deg;
+  inherits: false;
+}
+
+.nav-shell {
+  box-shadow: 0 10px 40px rgba(255, 102, 0, 0.22), 0 0 0 1px rgba(255, 102, 0, 0.08);
+}
+
+.nav-shell::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 1.5px;
+  background: conic-gradient(from var(--angle), #ff6600, #ff2e88, #7b4dff, #00e5ff, #ff6600);
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  animation: spin-ring 6s linear infinite;
+  pointer-events: none;
+}
+
+@keyframes spin-ring {
+  to { --angle: 360deg; }
+}
+
+/* News ticker */
+.ticker-track {
+  display: inline-flex;
+  white-space: nowrap;
+  animation: ticker 40s linear infinite;
+}
+
+.ticker:hover .ticker-track {
+  animation-play-state: paused;
+}
+
+@keyframes ticker {
+  to { transform: translateX(-50%); }
+}
+
+/* Glitching title: two tinted copies of the text flicker in offset slices every few seconds. */
+.glitch {
+  position: relative;
+  display: inline-block;
+}
+
+.glitch::before,
+.glitch::after {
+  content: attr(data-text);
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  text-shadow: none;
+  clip-path: inset(0 0 100% 0);
+}
+
+.glitch::before {
+  color: #00e5ff;
+  animation: glitch-a 4s infinite steps(1);
+}
+
+.glitch::after {
+  color: #ff2e88;
+  animation: glitch-b 4s infinite steps(1);
+  animation-delay: 0.05s;
+}
+
+@keyframes glitch-a {
+  0%, 86%, 100% { clip-path: inset(0 0 100% 0); transform: none; }
+  87% { clip-path: inset(8% 0 62% 0); transform: translate(-5px, -1px); }
+  89% { clip-path: inset(48% 0 22% 0); transform: translate(5px, 1px); }
+  91% { clip-path: inset(28% 0 46% 0); transform: translate(-3px, 2px); }
+  93% { clip-path: inset(72% 0 4% 0); transform: translate(4px, -2px); }
+  95% { clip-path: inset(0 0 100% 0); }
+}
+
+@keyframes glitch-b {
+  0%, 86%, 100% { clip-path: inset(0 0 100% 0); transform: none; }
+  88% { clip-path: inset(60% 0 12% 0); transform: translate(5px, 1px); }
+  90% { clip-path: inset(15% 0 70% 0); transform: translate(-5px, -2px); }
+  92% { clip-path: inset(40% 0 35% 0); transform: translate(3px, 1px); }
+  94% { clip-path: inset(0 0 100% 0); }
+}
+
+/* Cursor spotlight on team rows (position set from JS via --mx/--my). */
+.team-row {
+  background-image: radial-gradient(260px circle at var(--mx, -999px) var(--my, -999px), rgba(255, 102, 0, 0.2), transparent 70%);
+}
+
+/* HYPER MODE */
+[data-hyper] .glitch::before,
+[data-hyper] .glitch::after {
+  animation-duration: 0.7s;
+}
+
+[data-hyper] .ticker-track {
+  animation-duration: 8s !important;
+}
+
+[data-hyper] .nav-shell::before {
+  animation-duration: 0.8s;
+}
+
+[data-hyper] .board-card {
+  animation: hyper-wobble 0.35s ease-in-out infinite alternate;
+}
+
+@keyframes hyper-wobble {
+  from { transform: rotate(-0.4deg) scale(1); }
+  to { transform: rotate(0.4deg) scale(1.005); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .grain,
+  .ticker-track,
+  .nav-shell::before,
+  .glitch::before,
+  .glitch::after,
+  [data-hyper] .board-card {
+    animation: none !important;
+  }
+  .ticker {
+    overflow-x: auto;
+  }
+}

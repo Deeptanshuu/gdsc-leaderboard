@@ -193,7 +193,7 @@ export default function Reveal() {
   }, [next, back, restart]);
 
   return (
-    <Flex direction="column" minH="100vh" bg="rgba(8, 8, 8, 0.94)" color="white" position="relative" zIndex={1}>
+    <Flex direction="column" minH="100vh" bg="rgba(5, 2, 12, 0.4)" color="white" position="relative" zIndex={1}>
       <Flex justify="space-between" align="center" px={{ base: 4, md: 8 }} py={4} borderBottom={`3px solid ${ORANGE}`}>
         <Link as={RouterLink} to="/" display="flex" alignItems="center" gap={2} color="gray.400" _hover={{ color: 'white' }}>
           <ArrowLeft size={16} /> Board
